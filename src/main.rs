@@ -59,7 +59,7 @@ fn set_wallpaper_cinnamon(path_string: &String) {
         .arg("/org/cinnamon/desktop/background/picture-uri")
         .arg(image_parm)
         .spawn()
-        .expect("failed to set the wallpaper");
+        .expect("failed to set the wallpaper, might need to install dconf-cli");
 }
 
 fn write_image(data: Photo, path_string: &String) {
