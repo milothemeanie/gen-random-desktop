@@ -1,12 +1,15 @@
+extern crate env_logger;
+extern crate log;
 extern crate requests;
 
+use std::env;
 use std::fs;
 use std::path::Path;
-
-use requests::ToJson;
-
 use std::process::Command;
 
+use env_logger::Env;
+use log::info;
+use requests::ToJson;
 
 struct Photo {
     id: String,
@@ -16,20 +19,24 @@ struct Photo {
     height: u32,
 }
 
-const CLIENT_ID : &'static str = "3ac00ee4846a33d1d4b87cdff1d57f7471309a7d5b2639cba011a2187eee4cad";
+/// clientid is assigned from unsplash.com for api usage
+const CLIENT_ID: &'static str = "3ac00ee4846a33d1d4b87cdff1d57f7471309a7d5b2639cba011a2187eee4cad";
 
 fn main() {
-    println!("retrieving a random photo");
+    env_logger::from_env(Env::default().default_filter_or("info")).init();
+
+    info!("retrieving a random photo");
     let data = retrieve_photo();
 
-    println!("received photo");
-    println!("id:{} description:{}, downloadlink:{}, width:{}, height: {}",
-             data.id, data.description, data.download_link, data.width, data.height);
-
+    info!("<----------retrieve photo success---------->");
+    info!("  id:{}", data.id);
+    info!("  description:{}", data.description);
+    info!("  downloadlink:{}", data.download_link);
+    info!("  width:{}", data.width);
+    info!("  height:{}", data.height);
 
     let path_string = &format!("/tmp/{}.jpg", data.id);
     write_image(data, path_string);
-
     set_wallpaper_cinnamon(path_string);
 }
 
