@@ -2,7 +2,6 @@ extern crate env_logger;
 extern crate log;
 extern crate requests;
 
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
