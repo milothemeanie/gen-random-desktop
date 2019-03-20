@@ -42,8 +42,8 @@ fn main() {
 }
 
 fn write_description_file(data: Photo, gen_folder: &Path) {
-    let description_path_string = &format!("{}/{}.json", gen_folder.to_str().unwrap(), data.id);
-    let description_file = Path::new(description_path_string);
+    let description_file = &format!("{}/{}.json", gen_folder.to_str().unwrap(), data.id);
+    let description_file = Path::new(description_file);
     let mut file = File::create(description_file).expect("Failed creating the description file");
     file.write_all(data.raw_json.as_bytes()).expect("Failed writing the description file");
 }
