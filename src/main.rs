@@ -27,18 +27,9 @@ const CLIENT_ID: &'static str = "3ac00ee4846a33d1d4b87cdff1d57f7471309a7d5b2639c
 fn main() {
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
-    info!("retrieving a random photo");
     let data = retrieve_photo();
 
-    info!("<----------retrieve photo success---------->");
-    info!("  id:{}", data.id);
-    info!("  description:{}", data.description);
-    info!("  downloadlink:{}", data.download_link);
-    info!("  width:{}", data.width);
-    info!("  height:{}", data.height);
-
     let gen_folder = Path::new("/tmp/gen_random_desktop/");
-
     if !gen_folder.exists()
     {
         fs::create_dir(gen_folder).expect("unable to create temp directory");
@@ -58,6 +49,7 @@ fn write_description_file(data: &Photo, gen_folder: &&Path) {
 }
 
 fn retrieve_photo() -> Photo {
+    info!("retrieving a random photo");
     let response = requests::get(format!("https://api.unsplash.com/photos/random?client_id={}", CLIENT_ID)).unwrap();
     let data = response.json().unwrap();
     let data = Photo {
@@ -68,6 +60,14 @@ fn retrieve_photo() -> Photo {
         height: data["height"].as_u32().unwrap(),
         raw_json: data.pretty(4),
     };
+
+    info!("<----------retrieve photo success---------->");
+    info!("  id:{}", data.id);
+    info!("  description:{}", data.description);
+    info!("  downloadlink:{}", data.download_link);
+    info!("  width:{}", data.width);
+    info!("  height:{}", data.height);
+
     data
 }
 
