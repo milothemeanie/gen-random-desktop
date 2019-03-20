@@ -3,6 +3,8 @@ extern crate log;
 extern crate requests;
 
 use std::fs;
+use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
@@ -16,6 +18,7 @@ struct Photo {
     download_link: String,
     width: u32,
     height: u32,
+    raw_json: String,
 }
 
 /// clientid is assigned from unsplash.com for api usage
@@ -34,9 +37,24 @@ fn main() {
     info!("  width:{}", data.width);
     info!("  height:{}", data.height);
 
-    let path_string = &format!("/tmp/{}.jpg", data.id);
-    write_image(data, path_string);
-    set_wallpaper_cinnamon(path_string);
+    let gen_folder = Path::new("/tmp/gen_random_desktop/");
+
+    if !gen_folder.exists()
+    {
+        fs::create_dir(gen_folder).expect("unable to create temp directory");
+    }
+
+    let image_path_string = &format!("{}/{}.jpg", gen_folder.to_str().unwrap(), data.id);
+    write_image(&data.download_link, image_path_string);
+    set_wallpaper_cinnamon(image_path_string);
+    write_description_file(&data, &gen_folder);
+}
+
+fn write_description_file(data: &Photo, gen_folder: &&Path) {
+    let description_path_string = &format!("{}/{}.json", gen_folder.to_str().unwrap(), data.id);
+    let description_file = Path::new(description_path_string);
+    let mut file = File::create(description_file).expect("Failed creating the description file");
+    file.write_all(data.raw_json.as_bytes()).expect("Failed writing the description file");
 }
 
 fn retrieve_photo() -> Photo {
@@ -48,12 +66,13 @@ fn retrieve_photo() -> Photo {
         download_link: data["links"]["download"].to_string(),
         width: data["width"].as_u32().unwrap(),
         height: data["height"].as_u32().unwrap(),
+        raw_json: data.pretty(4),
     };
     data
 }
 
-fn set_wallpaper_cinnamon(path_string: &String) {
-    let image_parm = format!(r#"'file:///{}'"#, path_string);
+fn set_wallpaper_cinnamon(image_path_string: &String) {
+    let image_parm = format!(r#"'file:///{}'"#, image_path_string);
     Command::new("dconf")
         .arg("write")
         .arg("/org/cinnamon/desktop/background/picture-uri")
@@ -62,9 +81,9 @@ fn set_wallpaper_cinnamon(path_string: &String) {
         .expect("failed to set the wallpaper, might need to install dconf-cli");
 }
 
-fn write_image(data: Photo, path_string: &String) {
+fn write_image(download_link: &String, path_string: &String) {
     let path = Path::new(path_string);
-    let image_response = requests::get(data.download_link).unwrap();
+    let image_response = requests::get(download_link).unwrap();
     let image_response = image_response.content();
     fs::write(path, image_response).expect("failed to write image");
 }
