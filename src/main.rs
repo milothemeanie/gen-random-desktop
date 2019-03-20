@@ -38,10 +38,10 @@ fn main() {
     let image_path_string = &format!("{}/{}.jpg", gen_folder.to_str().unwrap(), data.id);
     write_image(&data.download_link, image_path_string);
     set_wallpaper_cinnamon(image_path_string);
-    write_description_file(&data, &gen_folder);
+    write_description_file(data, gen_folder);
 }
 
-fn write_description_file(data: &Photo, gen_folder: &&Path) {
+fn write_description_file(data: Photo, gen_folder: &Path) {
     let description_path_string = &format!("{}/{}.json", gen_folder.to_str().unwrap(), data.id);
     let description_file = Path::new(description_path_string);
     let mut file = File::create(description_file).expect("Failed creating the description file");
