@@ -1,16 +1,18 @@
 extern crate env_logger;
 extern crate log;
 extern crate requests;
+extern crate structopt;
 
 use std::fs;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Write, Read};
 use std::path::Path;
 use std::process::Command;
 
 use env_logger::Env;
 use log::info;
 use requests::ToJson;
+use structopt::StructOpt;
 
 struct Photo {
     id: String,
@@ -21,31 +23,68 @@ struct Photo {
     raw_json: String,
 }
 
+#[derive(StructOpt, Debug)]
+#[structopt(name = "basic")]
+struct Opt {
+    /// save current wallpaper
+    #[structopt(short = "s", long = "save-current")]
+    save: bool,
+}
+
+
 /// clientid is assigned from unsplash.com for api usage
 const CLIENT_ID: &'static str = "3ac00ee4846a33d1d4b87cdff1d57f7471309a7d5b2639cba011a2187eee4cad";
 
 fn main() {
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
-    let data = retrieve_photo();
+    let opt = Opt::from_args();
+    println!("{:?}", opt);
 
     let gen_folder = Path::new("/tmp/gen_random_desktop/");
+    if opt.save {
+        save_last_wallpaper(&gen_folder);
+    } else {
+        set_random_wallpaper(&gen_folder);
+    }
+}
+
+fn save_last_wallpaper(gen_folder: &&Path) {
+    let id_file = &format!("{}/current_wallpaper_id", gen_folder.to_str().unwrap());
+    let mut file = File::open(id_file).expect("Failed to read current_wallpaper_id file");
+    let mut id = String::new();
+    file.read_to_string(&mut id).expect("Failed retrieve id from current_wallpaper_id file");
+    let image_file = &format!("{}/{}.jpg", gen_folder.to_str().unwrap(), id);
+    let move_location = &format!("/home/cward/Pictures/{}.jpg", id);
+    info!("Saving last wallpaper {} to {}", image_file, move_location);
+    fs::copy(image_file, move_location).expect("Failed to save last wallpaper");
+}
+
+fn set_random_wallpaper(gen_folder: &&Path) {
+    let data = retrieve_photo();
     if !gen_folder.exists()
     {
         fs::create_dir(gen_folder).expect("unable to create temp directory");
     }
-
     let image_path_string = &format!("{}/{}.jpg", gen_folder.to_str().unwrap(), data.id);
     write_image(&data.download_link, image_path_string);
     set_wallpaper_cinnamon(image_path_string);
-    write_description_file(data, gen_folder);
+    let data = write_description_file(data, gen_folder);
+    write_current_wallpaper_file(data.id, gen_folder);
 }
 
-fn write_description_file(data: Photo, gen_folder: &Path) {
+fn write_description_file(data: Photo, gen_folder: &Path) -> Photo {
     let description_file = &format!("{}/{}.json", gen_folder.to_str().unwrap(), data.id);
     let description_file = Path::new(description_file);
     let mut file = File::create(description_file).expect("Failed creating the description file");
     file.write_all(data.raw_json.as_bytes()).expect("Failed writing the description file");
+    data
+}
+
+fn write_current_wallpaper_file(id: String, gen_folder: &Path) {
+    let id_file = &format!("{}/current_wallpaper_id", gen_folder.to_str().unwrap());
+    let mut file = File::create(id_file).expect("Failed to create current_wallpaper_id file");
+    file.write_all(id.as_bytes()).expect("Failed writing photo id in current_wallpaper_id file");
 }
 
 fn retrieve_photo() -> Photo {
