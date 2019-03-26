@@ -55,8 +55,8 @@ fn save_last_wallpaper(gen_folder: &Path) {
     let mut id = String::new();
     file.read_to_string(&mut id).expect("Failed retrieve id from current_wallpaper_id file");
 
-    copy_to_save_location(gen_folder, &mut id, ".jpg");
-    copy_to_save_location(gen_folder, &mut id, ".json");
+    copy_to_save_location(gen_folder, &id, ".jpg");
+    copy_to_save_location(gen_folder, &id, ".json");
 }
 
 fn copy_to_save_location(gen_folder: &Path, id: &String, ext: &str) {
