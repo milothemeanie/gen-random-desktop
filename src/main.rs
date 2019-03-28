@@ -10,7 +10,7 @@ use std::path::Path;
 use std::process::Command;
 
 use env_logger::Env;
-use log::{info,debug};
+use log::{info, debug};
 use requests::ToJson;
 use structopt::StructOpt;
 
@@ -24,7 +24,7 @@ struct Photo {
 }
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "gen-random-desktop", about ="sets desktop wallpaper to a random image from unsplash")]
+#[structopt(name = "gen-random-desktop", about = "sets desktop wallpaper to a random image from unsplash")]
 struct Opt {
     /// Save last random wallpaper
     #[structopt(short = "s", long = "save")]
@@ -52,13 +52,13 @@ fn main() {
 
     let gen_folder = Path::new("/tmp/gen_random_desktop");
 
-    if opt.random{
+    if opt.random {
         set_random_wallpaper(gen_folder);
     }
     if opt.save {
         save_last_wallpaper(gen_folder);
     }
-    if opt.detail{
+    if opt.detail {
         print_current_details(gen_folder);
     }
 }
@@ -78,18 +78,18 @@ fn retrieve_current_id(gen_folder: &Path) -> String {
     id
 }
 
-fn print_current_details(gen_folder: &Path){
+fn print_current_details(gen_folder: &Path) {
     let detail_file = &format!("{}/{}.json", gen_folder.to_str().unwrap(), retrieve_current_id(gen_folder));
     let mut file = File::open(detail_file).expect("Failed to read current_wallpaper_id file");
     let mut detail = String::new();
     file.read_to_string(&mut detail).expect("Failed retrieve id from current_wallpaper_id file");
 
-    info!("{}",detail)
+    info!("{}", detail)
 }
 
 fn copy_to_save_location(gen_folder: &Path, id: &String, ext: &str) {
     let image_file = &format!("{}/{}{}", gen_folder.to_str().unwrap(), id, ext);
-    let move_location = &format!("/home/cward/Pictures/{}{}", id,ext);
+    let move_location = &format!("/home/cward/Pictures/{}{}", id, ext);
     info!("Saving last wallpaper {} to {}", image_file, move_location);
     fs::copy(image_file, move_location).expect("Failed to save last wallpaper");
 }
