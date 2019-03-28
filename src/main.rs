@@ -96,8 +96,7 @@ fn copy_to_save_location(gen_folder: &Path, id: &String, ext: &str) {
 
 fn set_random_wallpaper(gen_folder: &Path) {
     let data = retrieve_photo();
-    if !gen_folder.exists()
-    {
+    if !gen_folder.exists() {
         fs::create_dir(gen_folder).expect("unable to create temp directory");
     }
     let image_path_string = &format!("{}/{}.jpg", gen_folder.to_str().unwrap(), data.id);
