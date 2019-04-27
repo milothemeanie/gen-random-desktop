@@ -66,8 +66,8 @@ fn main() {
 fn save_last_wallpaper(gen_folder: &Path) {
     let id = retrieve_current_id(gen_folder);
 
-    copy_to_save_location(gen_folder, &id, ".jpg");
-    copy_to_save_location(gen_folder, &id, ".json");
+    copy_to_save_location(gen_folder, &id, ".jpg", true);
+    copy_to_save_location(gen_folder, &id, ".json", false);
 }
 
 fn retrieve_current_id(gen_folder: &Path) -> String {
@@ -87,11 +87,15 @@ fn print_current_details(gen_folder: &Path) {
     info!("{}", detail)
 }
 
-fn copy_to_save_location(gen_folder: &Path, id: &String, ext: &str) {
+fn copy_to_save_location(gen_folder: &Path, id: &String, ext: &str, save: bool) {
     let image_file = &format!("{}/{}{}", gen_folder.to_str().unwrap(), id, ext);
     let move_location = &format!("/home/cward/Pictures/{}{}", id, ext);
     info!("Saving last wallpaper {} to {}", image_file, move_location);
     fs::copy(image_file, move_location).expect("Failed to save last wallpaper");
+
+    if save {
+        set_wallpaper_cinnamon(move_location);
+    }
 }
 
 fn set_random_wallpaper(gen_folder: &Path) {
