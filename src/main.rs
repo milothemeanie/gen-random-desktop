@@ -2,6 +2,7 @@ extern crate env_logger;
 extern crate log;
 extern crate requests;
 extern crate structopt;
+extern crate eventual;
 
 use std::fs;
 use std::fs::File;
@@ -13,6 +14,7 @@ use env_logger::Env;
 use log::{info, debug};
 use requests::ToJson;
 use structopt::StructOpt;
+use eventual::Timer;
 
 struct Photo {
     id: String,
@@ -38,6 +40,9 @@ struct Opt {
     #[structopt(short = "r", long = "random")]
     random: bool,
 
+    /// Set random wallpaper per X minutes
+    #[structopt(short = "t", long = "timer")]
+    timer: u32,
 }
 
 
@@ -52,6 +57,15 @@ fn main() {
 
     let gen_folder = Path::new("/tmp/gen_random_desktop");
 
+    if opt.timer > 0 {
+        let timer = Timer::new();
+
+        let ticks = timer.interval_ms(minutes_to_milli(opt.timer)).iter();
+        for _ in ticks {
+            set_random_wallpaper(gen_folder);
+        }
+    }
+
     if opt.random {
         set_random_wallpaper(gen_folder);
     }
@@ -61,6 +75,12 @@ fn main() {
     if opt.detail {
         print_current_details(gen_folder);
     }
+}
+
+fn minutes_to_milli(minutes: u32) -> u32{
+    let milli = (minutes * 60) * 1000;
+
+    milli
 }
 
 fn save_last_wallpaper(gen_folder: &Path) {
