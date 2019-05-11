@@ -41,7 +41,7 @@ struct Opt {
     random: bool,
 
     /// Set random wallpaper per X minutes
-    #[structopt(short = "t", long = "timer")]
+    #[structopt(short = "t", long = "timer", default_value="0")]
     timer: u32,
 }
 
