@@ -5,8 +5,8 @@ authors = ["cward"]
 edition = "2018"
 
 [dependencies]
-requests = "0.0.30"
-env_logger = "0.6.1"
-log = "0.4.6"
-structopt = "0.2"
-eventual = "0.1.7"
+requests = "0.0.*"
+env_logger = "0.8.*"
+log = "0.4.*"
+structopt = "0.3.*"
+eventual = "0.1.*"

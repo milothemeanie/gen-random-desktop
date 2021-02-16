@@ -50,7 +50,7 @@ struct Opt {
 const CLIENT_ID: &'static str = "3ac00ee4846a33d1d4b87cdff1d57f7471309a7d5b2639cba011a2187eee4cad";
 
 fn main() {
-    env_logger::from_env(Env::default().default_filter_or("info")).init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     let opt = Opt::from_args();
     debug!("{:?}", opt);
@@ -66,9 +66,8 @@ fn main() {
         }
     }
 
-    if opt.random {
-        set_random_wallpaper(gen_folder);
-    }
+    set_random_wallpaper(gen_folder);
+
     if opt.save {
         save_last_wallpaper(gen_folder);
     }
